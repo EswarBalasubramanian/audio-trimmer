@@ -1,0 +1,29 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Audio Trimmer</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-item>
+    <ion-label position="stacked">Select an audio file</ion-label>
+    <input type="file" (change)="handleFileInput($event)" />
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="stacked">Start Time (e.g., 00:00:10)</ion-label>
+    <ion-input [(ngModel)]="start"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="stacked">End Time (e.g., 00:00:20)</ion-label>
+    <ion-input [(ngModel)]="end"></ion-input>
+  </ion-item>
+
+  <ion-button expand="full" (click)="transcode()">Trim Audio</ion-button>
+
+  <div *ngIf="src">
+    <h3>Trimmed Audio:</h3>
+    <audio [src]="src" controls></audio>
+  </div>
+</ion-content>
