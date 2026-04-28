@@ -1,10 +1,10 @@
-<ion-header translucent="true">
-  <ion-toolbar class="no-border">
-    <ion-title>SONICTRIM</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="tab1-content">
+<ion-content class="tab1-content" [fullscreen]="true">
+  <ion-header translucent="true">
+    <ion-toolbar class="no-border">
+      <ion-title>Audio Trimmer</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
 
   <div class="container">
 
@@ -104,9 +104,7 @@
           <span>{{ (end - start) | number:'1.1-1' }}s • Lossless</span>
         </div>
 
-        <a class="download-btn" [href]="trimFileSrc" download>
-          <ion-icon name="download-outline"></ion-icon>
-        </a>
+        <ion-icon name="download-outline" (click)="saveFile(blob)"></ion-icon>
 
       </div>
 

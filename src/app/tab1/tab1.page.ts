@@ -1,5 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import toWav from 'audiobuffer-to-wav';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 
 @Component({
   selector: 'app-tab1',
@@ -25,6 +26,7 @@ export class Tab1Page implements OnInit {
   editingEnd = false;
   currentTimeFormatted = '00:00';
   durationFormatted = '00:00';
+  blob!: Blob;
 
   constructor() {
   }
@@ -106,6 +108,30 @@ export class Tab1Page implements OnInit {
     const blob = new Blob([wavData], { type: 'audio/wav' });
 
     this.trimFileSrc = URL.createObjectURL(blob);
+    this.blob = blob;
+  }
+  
+  protected async saveFile(blob: Blob) {
+    const base64 = await this.blobToBase64(blob);
+
+    await Filesystem.writeFile({
+      path: `trimmed_${Date.now()}.wav`,
+      data: base64 as string,
+      directory: Directory.Documents
+    });
+
+    alert('Saved to Documents');
+  }
+
+  private blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve((reader.result as string).split(',')[1]);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
   }
 
   private formatTimeMMSS(seconds: number): string {

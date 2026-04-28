@@ -1,0 +1,10 @@
+/build/*
+!/build/.npmkeep
+
+# Specific module build folder
+/build
+
+# Signing files (Never commit these for security)
+*.jks
+*.keystore
+/google-services.json

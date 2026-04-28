@@ -1,6 +1,12 @@
-/* REMOVE Ionic default padding properly */
-.tab1-content::part(scroll) {
-  padding: 0;
+:host {
+  display: block;
+  height: 100%;
+}
+
+ion-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 /* Container handles spacing instead */
