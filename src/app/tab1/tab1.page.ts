@@ -1,6 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import toWav from 'audiobuffer-to-wav';
 import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Capacitor } from '@capacitor/core';
 
 @Component({
   selector: 'app-tab1',
@@ -27,6 +28,11 @@ export class Tab1Page implements OnInit {
   currentTimeFormatted = '00:00';
   durationFormatted = '00:00';
   blob!: Blob;
+  selectedDirectory: string = 'Downloads';
+
+  get isNativePlatform(): boolean {
+    return Capacitor.getPlatform() !== 'web';
+  }
 
   constructor() {
   }
@@ -112,15 +118,51 @@ export class Tab1Page implements OnInit {
   }
   
   protected async saveFile(blob: Blob) {
-    const base64 = await this.blobToBase64(blob);
+    if (Capacitor.getPlatform() === 'web') {
+      // Web platform: create download link
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `trimmed_${Date.now()}.wav`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } else {
+      // Native platform: save to device storage
+      const base64 = await this.blobToBase64(blob);
+      const directory = this.getDirectoryEnum(this.selectedDirectory);
 
-    await Filesystem.writeFile({
-      path: `trimmed_${Date.now()}.wav`,
-      data: base64 as string,
-      directory: Directory.Documents
-    });
+      await Filesystem.writeFile({
+        path: this.getFilePath(this.selectedDirectory, Date.now()),
+        data: base64 as string,
+        directory: directory
+      });
 
-    alert('Saved to Documents');
+      alert(`Saved to ${this.selectedDirectory}`);
+    }
+  }
+
+  private getDirectoryEnum(dir: string): Directory {
+    switch (dir) {
+      case 'Documents':
+        return Directory.Documents;
+      case 'Downloads':
+        return Directory.ExternalStorage;
+      case 'Data':
+        return Directory.Data;
+      default:
+        return Directory.Documents;
+    }
+  }
+
+  private getFilePath(dir: string, timestamp: number): string {
+    switch (dir) {
+      case 'Downloads':
+        return `Download/trimmed_${timestamp}.wav`;
+      default:
+        return `trimmed_${timestamp}.wav`;
+    }
   }
 
   private blobToBase64(blob: Blob): Promise<string> {
