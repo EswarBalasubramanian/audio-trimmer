@@ -1,29 +1,117 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Audio Trimmer</ion-title>
+<ion-header translucent="true">
+  <ion-toolbar class="no-border">
+    <ion-title>SONICTRIM</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-item>
-    <ion-label position="stacked">Select an audio file</ion-label>
-    <input type="file" (change)="handleFileInput($event)" />
-  </ion-item>
+<ion-content class="tab1-content">
 
-  <ion-item>
-    <ion-label position="stacked">Start Time (e.g., 00:00:10)</ion-label>
-    <ion-input [(ngModel)]="start"></ion-input>
-  </ion-item>
+  <div class="container">
 
-  <ion-item>
-    <ion-label position="stacked">End Time (e.g., 00:00:20)</ion-label>
-    <ion-input [(ngModel)]="end"></ion-input>
-  </ion-item>
+    <!-- Title -->
+    <div class="title-section">
+      <h1>Audio Trimmer</h1>
+      <p>Precise surgical trimming for pro audio.</p>
+    </div>
 
-  <ion-button expand="full" (click)="transcode()">Trim Audio</ion-button>
+    <!-- Upload -->
+    <div class="upload-box" (click)="fileInput.click()">
+      <input #fileInput type="file" hidden (change)="handleFileInput($event)" />
+      <ion-icon name="cloud-upload-outline"></ion-icon>
+      <p>Drag & Drop Audio</p>
+      <span>WAV, MP3, AAC UP TO 50MB</span>
+    </div>
 
-  <div *ngIf="src">
-    <h3>Trimmed Audio:</h3>
-    <audio [src]="src" controls></audio>
+    <!-- Wave Card -->
+    <div *ngIf="file" class="wave-card">
+
+      <div class="wave-header">
+        <span class="file-name">{{ file?.name }}</span>
+        <div class="meta">
+          <span>44.1kHz</span>
+          <span>24-bit</span>
+        </div>
+      </div>
+
+      <div class="waveform">
+        <div class="wave-container">
+          <canvas #waveCanvas></canvas>
+        </div>
+        <div #playhead class="playhead"></div>
+      </div>
+
+      <audio #audioRef [src]="fileSrc" hidden (timeupdate)="onTimeUpdate()"></audio>
+
+      <div class="time-indicator">
+        <span>{{ currentTimeFormatted }} / {{ durationFormatted }}</span>
+      </div>
+
+      <div class="controls">
+        <ion-icon name="play-back-outline" (click)="seekBackward()"></ion-icon>
+
+        <button class="play-btn" (click)="togglePlay()">
+          <ion-icon [name]="isPlaying ? 'pause' : 'play'"></ion-icon>
+        </button>
+
+        <ion-icon name="play-forward-outline" (click)="seekForward()"></ion-icon>
+      </div>
+
+    </div>
+
+    <!-- Time Inputs -->
+    <div class="time-grid">
+
+      <div class="time-box">
+        <label>Start Time</label>
+        <ion-input
+          type="number"
+          [(ngModel)]="start"
+          (ionBlur)="onBlurStart()"
+          class="time-input"
+        ></ion-input>
+      </div>
+
+      <div class="time-box">
+        <label>End Time</label>
+        <ion-input
+          type="number"
+          [(ngModel)]="end"
+          (ionBlur)="onBlurEnd()"
+          class="time-input active"
+        ></ion-input>
+      </div>
+
+    </div>
+
+    <!-- Trim Button -->
+    <button class="trim-btn" (click)="trim()">
+      <ion-icon name="cut-outline"></ion-icon>
+      Trim Audio
+    </button>
+
+    <!-- Trimmed Results -->
+    <div *ngIf="trimFileSrc" class="results">
+
+      <div class="results-header">
+        <h3>Trimmed Results</h3>
+        <!-- <button class="history-btn">History</button> -->
+      </div>
+
+      <div class="result-card">
+
+        <div class="info">
+          <p>trimmed.wav</p>
+          <span>{{ (end - start) | number:'1.1-1' }}s • Lossless</span>
+        </div>
+
+        <a class="download-btn" [href]="trimFileSrc" download>
+          <ion-icon name="download-outline"></ion-icon>
+        </a>
+
+      </div>
+
+    </div>
+
   </div>
+
 </ion-content>
